@@ -476,7 +476,7 @@ def install(m, pkgspec, cache, upgrade=False, default_release=None,
             pkg_list.append("'%s'" % package)
     packages = ' '.join(pkg_list)
 
-    if len(packages) != 0:
+    if len(packages) != 0 or autoremove:
         if force:
             force_yes = '--force-yes'
         else:
@@ -489,6 +489,7 @@ def install(m, pkgspec, cache, upgrade=False, default_release=None,
 
         if autoremove:
             autoremove = '--auto-remove'
+            force_yes = '--force-yes'
         else:
             autoremove = ''
 
@@ -624,7 +625,7 @@ def remove(m, pkgspec, cache, purge=False, force=False,
 
     if len(packages) == 0:
         m.exit_json(changed=False)
-    else:
+    elif autoremove:
         if force:
             force_yes = '--force-yes'
         else:
@@ -637,6 +638,7 @@ def remove(m, pkgspec, cache, purge=False, force=False,
 
         if autoremove:
             autoremove = '--auto-remove'
+            force_yes = '--force-yes'
         else:
             autoremove = ''
 
