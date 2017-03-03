@@ -476,7 +476,7 @@ def install(m, pkgspec, cache, upgrade=False, default_release=None,
             pkg_list.append("'%s'" % package)
     packages = ' '.join(pkg_list)
 
-    if len(packages) != 0:
+    if len(packages) != 0 or autoremove:
         if force:
             force_yes = '--force-yes'
         else:
@@ -489,6 +489,7 @@ def install(m, pkgspec, cache, upgrade=False, default_release=None,
 
         if autoremove:
             autoremove = '--auto-remove'
+            force_yes = '--force-yes'
         else:
             autoremove = ''
 
@@ -623,7 +624,11 @@ def remove(m, pkgspec, cache, purge=False, force=False,
     packages = ' '.join(pkg_list)
 
     if len(packages) == 0:
-        m.exit_json(changed=False)
+        if autoremove:
+            autoremove = '--auto-remove'
+            force_yes = '--force-yes'
+        else:
+            m.exit_json(changed=False)
     else:
         if force:
             force_yes = '--force-yes'
@@ -637,6 +642,7 @@ def remove(m, pkgspec, cache, purge=False, force=False,
 
         if autoremove:
             autoremove = '--auto-remove'
+            force_yes = '--force-yes'
         else:
             autoremove = ''
 
@@ -645,16 +651,16 @@ def remove(m, pkgspec, cache, purge=False, force=False,
         else:
             check_arg = ''
 
-        cmd = "%s -q -y %s %s %s %s %s remove %s" % (APT_GET_CMD, dpkg_options, purge, force_yes ,autoremove, check_arg, packages)
+    cmd = "%s -q -y %s %s %s %s %s remove %s" % (APT_GET_CMD, dpkg_options, purge, force_yes ,autoremove, check_arg, packages)
 
-        rc, out, err = m.run_command(cmd)
-        if m._diff:
-            diff = parse_diff(out)
-        else:
-            diff = {}
-        if rc:
-            m.fail_json(msg="'apt-get remove %s' failed: %s" % (packages, err), stdout=out, stderr=err)
-        m.exit_json(changed=True, stdout=out, stderr=err, diff=diff)
+    rc, out, err = m.run_command(cmd)
+    if m._diff:
+        diff = parse_diff(out)
+    else:
+        diff = {}
+    if rc:
+        m.fail_json(msg="'apt-get remove %s' failed: %s" % (packages, err), stdout=out, stderr=err)
+    m.exit_json(changed=True, stdout=out, stderr=err, diff=diff)
 
 
 def upgrade(m, mode="yes", force=False, default_release=None,
